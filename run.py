@@ -1,22 +1,9 @@
 import tkinter as tk
 import numpy as np
 import datetime
-import ffmpeg
+import cv2 as cv
 
 from PIL import Image, ImageTk, ImageDraw, ImageFont
-
-def extract_frame(input_vid, frame_num):
-   out, _ = (
-       ffmpeg
-       .input(input_vid)
-       .filter_('select', 'gte(n,{})'.format(frame_num))
-       .output('pipe:', format='rawvideo', pix_fmt='gray16le', vframes=1)
-       .run(capture_stdout=True, capture_stderr=True)
-   )
-   return np.frombuffer(out, np.uint16).reshape([720, 1280])
- 
-for i in range(totalFrameNumber):
-   frame = extract_frame('test_ffv1.avi',i)
 
 class App():    
     def __init__(self, overlay: str) -> None:
@@ -29,7 +16,12 @@ class App():
         self.label.grid(row=0, column=0)
     
         # Creating the capture
-        self.capture = cv.VideoCapture(0, cv.CAP_DSHOW)
+        self.capture = cv.VideoCapture()
+        self.capture.open("/dev/video0", apiPreference=cv.CAP_V4L2)
+        self.capture.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc("M", "J", "P", "G"))
+        self.capture.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
+        self.capture.set(cv.CAP_PROP_FRAME_WIDTH, 960)
+        self.capture.set(cv.CAP_PROP_FPS, 30)
         self.video()
         self.window.mainloop()
     
